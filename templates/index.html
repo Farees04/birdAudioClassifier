@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bird Sound Identifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Bird Sound Identifier</h1>
+            <p>Upload bird audio to identify species</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-container">
+                <input type="file" id="audioFile" accept="audio/*" class="file-input" onchange="enableButton()">
+                <label for="audioFile" class="file-label">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 24 24" width="40" height="40">
+                            <path fill="currentColor" d="M14,13V17H10V13H7L12,8L17,13H14M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z"/>
+                        </svg>
+                    </div>
+                    <div class="upload-text">
+                        <h3>Click to upload audio file</h3>
+                        <p>Supported formats: WAV, MP3, AAC</p>
+                    </div>
+                </label>
+                <div id="file-details" class="file-details"></div>
+                <button class="predict-btn" id="predict-btn" onclick="predictBird()" disabled>Identify Bird Species</button>
+            </div>
+        </div>
+
+        <div class="results-box">
+            <div class="loading" id="loading">
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+            </div>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        function enableButton() {
+            const fileInput = document.getElementById('audioFile');
+            const predictBtn = document.getElementById('predict-btn');
+            const fileDetails = document.getElementById('file-details');
+
+            if (fileInput.files.length > 0) {
+                predictBtn.disabled = false;
+                fileDetails.innerHTML = `<p>Selected File: <b>${fileInput.files[0].name}</b></p>`;
+                fileDetails.style.opacity = 1;
+            } else {
+                predictBtn.disabled = true;
+                fileDetails.innerHTML = "";
+                fileDetails.style.opacity = 0;
+            }
+        }
+
+        async function predictBird() {
+            const file = document.getElementById('audioFile').files[0];
+            
+            if (!file) {
+                alert('Please select an audio file first!');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            const loading = document.getElementById('loading');
+            const predictBtn = document.getElementById('predict-btn');
+
+            predictBtn.disabled = true;
+            loading.style.display = 'flex';
+            resultsDiv.innerHTML = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                setTimeout(() => {  // Simulate delay for better UI experience
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<div class="error">${data.error}</div>`;
+                    }
+                    else {
+                        resultsDiv.innerHTML = `
+                            <div class="prediction-item">
+                                <div class="bird-name">The bird is "<span>${data.bird}</span>"</div>
+                            </div>
+                        `;
+}
+
+                    loading.style.display = 'none';
+                    predictBtn.disabled = false;
+                }, 2000); // 2-second delay
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                loading.style.display = 'none';
+                predictBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

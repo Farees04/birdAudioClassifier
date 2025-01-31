@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 wavfiles
-
+model.h5
 # Distribution / packaging
 .Python
 build/
