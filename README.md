@@ -1,6 +1,6 @@
 # Bird Sound Classification Project
 
-This project aims to classify bird species based on their sound. The model is built using deep learning techniques, specifically using a Convolutional Neural Network (CNN), and the trained model is saved as `model.h5`. The project uses a custom dataset for bird sound classification, and the dataset is sourced from [Kaggle](https://www.kaggle.com/datasets/vinayshanbhag/bird-song-data-set).
+This project aims to classify bird species based on their sound. The model is built using deep learning techniques, specifically using a Convolutional Neural Network (CNN), and the trained model is saved as `model.h5`. The project uses a custom dataset for bird sound classification, and the dataset is sourced from Kaggle.
 
 ## Project Flow
 
@@ -14,7 +14,7 @@ This project aims to classify bird species based on their sound. The model is bu
    - The app provides a user-friendly interface where you can upload an audio file, and the model will predict the bird species for you.
 
 3. **Dataset**: 
-   - The dataset used for training is a collection of bird sound recordings from [Kaggle](https://www.kaggle.com/datasets/vinayshanbhag/bird-song-data-set).
+   - The dataset used for training is a collection of bird sound recordings from Kaggle.
    - It contains audio files labeled with the bird species, which are used to train the model to recognize specific bird sounds.
 
 ## Installation
