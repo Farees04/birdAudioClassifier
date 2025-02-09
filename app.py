@@ -9,22 +9,21 @@ app = Flask(__name__)
 # Load the trained model
 model = tf.keras.models.load_model("model.h5")
 
-# Bird class mapping
-BIRD_CLASSES = {
-    0: "Sparrow",
-    1: "Robin",
-    2: "Blue Jay",
-    3: "Cardinal",
-    4: "Goldfinch",
-    5: "Woodpecker"
-}
 
-# Function to extract MFCC features
-def extract_features(audio_path):
-    y, sr = librosa.load(audio_path, sr=22050)  # Load audio
-    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)  # Extract MFCC features
-    mfccs = np.mean(mfccs, axis=1)  # Average over time
-    return mfccs.reshape(1, -1)  # Reshape for model
+bird_list = ["Bewick's Wren", "Northern Mockingbird",
+              "American Robin", "Song Sparrow", "Northern Cardinal"]
+
+
+
+
+def features_extractor(file):
+    audio, sample_rate = librosa.load(file, res_type='kaiser_fast') 
+    mfccs_features = librosa.feature.mfcc(y=audio, sr=sample_rate, n_mfcc=40)
+    mfccs_scaled_features = np.mean(mfccs_features.T,axis=0)
+    mfccs_scaled_features=mfccs_scaled_features.reshape(1,-1)
+    
+    return mfccs_scaled_features
+
 
 @app.route("/")
 def home():
@@ -40,10 +39,14 @@ def predict():
     file.save(file_path)  # Save the file temporarily
 
     try:
-        features = extract_features(file_path)  # Extract MFCC features
-        prediction = model.predict(features)
-        predicted_index = np.argmax(prediction)  # Get predicted class index
-        bird_name = BIRD_CLASSES.get(predicted_index, "Unknown Bird")  # Map to bird name
+        features = features_extractor(file_path)  # Extract MFCC features
+        normalized_data = tf.keras.utils.normalize(features)
+        prediction = model.predict(normalized_data)
+
+        predicted_class = np.argmax(prediction, axis=1)
+        bird_name = bird_list[predicted_class[0]]
+         # Get predicted class index
+    
     except Exception as e:
         try:
            os.remove(file_path)
@@ -53,7 +56,7 @@ def predict():
 
     os.remove(file_path)  # Clean up temp file
 
-    return jsonify({"bird": bird_name})
+    return {"bird":bird_name}
 
 if __name__ == "__main__":
     app.run(debug=True)
